@@ -1,0 +1,221 @@
+<h2>Page Flow & Layout</h2>
+<p class="subtitle">Application consists of 3 main pages with a linear flow</p>
+
+<div class="section">
+  <h3>User Journey</h3>
+  <div style="display:flex;gap:16px;align-items:center;justify-content:center;padding:24px 0;flex-wrap:wrap;">
+    <div style="background:#18181b;color:#fafafa;padding:12px 20px;border-radius:8px;font-size:14px;text-align:center;">
+      <div style="font-size:11px;color:#71717a;margin-bottom:4px;">Page 1</div>
+      Upload
+    </div>
+    <div style="color:#71717a;font-size:20px;">&#8594;</div>
+    <div style="background:#18181b;color:#fafafa;padding:12px 20px;border-radius:8px;font-size:14px;text-align:center;">
+      <div style="font-size:11px;color:#71717a;margin-bottom:4px;">Page 2</div>
+      Processing
+    </div>
+    <div style="color:#71717a;font-size:20px;">&#8594;</div>
+    <div style="background:#18181b;color:#fafafa;padding:12px 20px;border-radius:8px;font-size:14px;text-align:center;">
+      <div style="font-size:11px;color:#71717a;margin-bottom:4px;">Page 3</div>
+      Editor
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Page 1: Upload (Landing)</h3>
+  <div class="mockup">
+    <div class="mockup-header">Upload Page — Clean, Focused Input</div>
+    <div class="mockup-body" style="padding:32px;background:#fafafa;">
+      <!-- Header -->
+      <div style="text-align:center;margin-bottom:32px;">
+        <div style="font-size:24px;font-weight:700;color:#18181b;">ResumeForge</div>
+        <div style="font-size:13px;color:#71717a;margin-top:4px;">AI-Powered Resume Tailoring</div>
+      </div>
+
+      <!-- Two column input -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;max-width:720px;margin:0 auto;">
+        <!-- Left: Resume -->
+        <div style="border:2px dashed #d4d4d8;border-radius:12px;padding:24px;text-align:center;background:white;">
+          <div style="font-size:32px;margin-bottom:8px;">&#128196;</div>
+          <div style="font-size:14px;font-weight:600;color:#18181b;">Your Resume</div>
+          <div style="font-size:12px;color:#a1a1aa;margin-top:4px;">Drop screenshot or paste text</div>
+          <div style="margin-top:16px;padding:8px 16px;background:#f4f4f5;border-radius:6px;font-size:12px;color:#71717a;display:inline-block;">Upload Image</div>
+          <div style="margin-top:8px;font-size:11px;color:#a1a1aa;">or</div>
+          <div style="margin-top:8px;border:1px solid #e4e4e7;border-radius:6px;padding:8px;font-size:12px;color:#a1a1aa;text-align:left;min-height:60px;">
+            Paste your resume text here...
+          </div>
+        </div>
+
+        <!-- Right: JD -->
+        <div style="border:2px dashed #d4d4d8;border-radius:12px;padding:24px;text-align:center;background:white;">
+          <div style="font-size:32px;margin-bottom:8px;">&#128188;</div>
+          <div style="font-size:14px;font-weight:600;color:#18181b;">Target Job Description</div>
+          <div style="font-size:12px;color:#a1a1aa;margin-top:4px;">Drop screenshot or paste text</div>
+          <div style="margin-top:16px;padding:8px 16px;background:#f4f4f5;border-radius:6px;font-size:12px;color:#71717a;display:inline-block;">Upload Image</div>
+          <div style="margin-top:8px;font-size:11px;color:#a1a1aa;">or</div>
+          <div style="margin-top:8px;border:1px solid #e4e4e7;border-radius:6px;padding:8px;font-size:12px;color:#a1a1aa;text-align:left;min-height:60px;">
+            Paste job description here...
+          </div>
+        </div>
+      </div>
+
+      <!-- Options row -->
+      <div style="max-width:720px;margin:20px auto 0;display:flex;gap:16px;align-items:center;justify-content:center;">
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span style="font-size:12px;color:#71717a;">Framework:</span>
+          <span style="padding:4px 10px;background:#18181b;color:#fafafa;border-radius:4px;font-size:11px;">STAR</span>
+          <span style="padding:4px 10px;background:#f4f4f5;color:#71717a;border-radius:4px;font-size:11px;">PDCA</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span style="font-size:12px;color:#71717a;">Language:</span>
+          <span style="padding:4px 10px;background:#18181b;color:#fafafa;border-radius:4px;font-size:11px;">CN</span>
+          <span style="padding:4px 10px;background:#f4f4f5;color:#71717a;border-radius:4px;font-size:11px;">EN</span>
+        </div>
+      </div>
+
+      <!-- Generate button -->
+      <div style="text-align:center;margin-top:24px;">
+        <div style="display:inline-block;padding:12px 48px;background:#18181b;color:#fafafa;border-radius:8px;font-size:14px;font-weight:600;">
+          Generate Resume &#8594;
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Page 2: Processing (Pipeline Progress)</h3>
+  <div class="mockup">
+    <div class="mockup-header">Processing Page — Show Pipeline Progress</div>
+    <div class="mockup-body" style="padding:32px;background:#fafafa;">
+      <div style="max-width:480px;margin:0 auto;">
+        <div style="text-align:center;margin-bottom:24px;">
+          <div style="font-size:18px;font-weight:600;color:#18181b;">Generating Your Resume</div>
+          <div style="font-size:13px;color:#71717a;margin-top:4px;">This usually takes 15-25 seconds</div>
+        </div>
+
+        <!-- Step indicators -->
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:white;border-radius:8px;border:1px solid #e4e4e7;">
+            <div style="width:20px;height:20px;background:#22c55e;border-radius:50%;font-size:11px;color:white;display:flex;align-items:center;justify-content:center;">&#10003;</div>
+            <div style="font-size:13px;color:#18181b;">Parsing your resume</div>
+            <div style="margin-left:auto;font-size:11px;color:#a1a1aa;">2.1s</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:white;border-radius:8px;border:1px solid #e4e4e7;">
+            <div style="width:20px;height:20px;background:#22c55e;border-radius:50%;font-size:11px;color:white;display:flex;align-items:center;justify-content:center;">&#10003;</div>
+            <div style="font-size:13px;color:#18181b;">Analyzing job description</div>
+            <div style="margin-left:auto;font-size:11px;color:#a1a1aa;">1.8s</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:white;border-radius:8px;border:1px solid #18181b;">
+            <div style="width:20px;height:20px;border:2px solid #18181b;border-radius:50%;border-top-color:transparent;animation:spin 1s linear infinite;"></div>
+            <div style="font-size:13px;font-weight:600;color:#18181b;">Matching & rewriting experiences</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:white;border-radius:8px;border:1px solid #e4e4e7;opacity:0.5;">
+            <div style="width:20px;height:20px;border:1px solid #d4d4d8;border-radius:50%;"></div>
+            <div style="font-size:13px;color:#a1a1aa;">Generating personal strengths</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:white;border-radius:8px;border:1px solid #e4e4e7;opacity:0.5;">
+            <div style="width:20px;height:20px;border:1px solid #d4d4d8;border-radius:50%;"></div>
+            <div style="font-size:13px;color:#a1a1aa;">Writing 3-line intro</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:white;border-radius:8px;border:1px solid #e4e4e7;opacity:0.5;">
+            <div style="width:20px;height:20px;border:1px solid #d4d4d8;border-radius:50%;"></div>
+            <div style="font-size:13px;color:#a1a1aa;">Quality review</div>
+          </div>
+        </div>
+      </div>
+      <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Page 3: Editor (Main Workspace)</h3>
+  <div class="mockup">
+    <div class="mockup-header">Editor Page — Split View: Edit Left, Preview Right</div>
+    <div class="mockup-body" style="padding:0;background:#fafafa;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;min-height:400px;">
+        <!-- Left: Editor Panel -->
+        <div style="border-right:1px solid #e4e4e7;padding:20px;overflow-y:auto;">
+          <!-- Toolbar -->
+          <div style="display:flex;gap:8px;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid #e4e4e7;">
+            <div style="padding:4px 10px;background:#18181b;color:#fafafa;border-radius:4px;font-size:11px;">Classic</div>
+            <div style="padding:4px 10px;background:#f4f4f5;color:#71717a;border-radius:4px;font-size:11px;">Modern</div>
+            <div style="padding:4px 10px;background:#f4f4f5;color:#71717a;border-radius:4px;font-size:11px;">Tech</div>
+            <div style="margin-left:auto;padding:4px 10px;background:#f4f4f5;color:#71717a;border-radius:4px;font-size:11px;">&#8595; PDF</div>
+          </div>
+
+          <!-- Three-line intro card -->
+          <div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;padding:12px;margin-bottom:16px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+              <div style="font-size:11px;font-weight:600;color:#9a3412;">Three-Line Intro (for recruitment apps)</div>
+              <div style="font-size:10px;color:#fb923c;cursor:pointer;">&#8635; Regenerate</div>
+            </div>
+            <div style="font-size:12px;color:#431407;line-height:1.6;">
+              5 years of product management experience in the fintech sector, previously led payment system design at ABC Company serving 10M+ users. Skilled in data-driven decision making and cross-functional team collaboration, with a track record of 40% conversion improvement.
+            </div>
+          </div>
+
+          <!-- Summary section -->
+          <div style="margin-bottom:16px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+              <div style="font-size:13px;font-weight:600;color:#18181b;">Personal Summary</div>
+              <div style="font-size:10px;color:#71717a;cursor:pointer;">&#8635; Regen</div>
+            </div>
+            <div style="border:1px solid #e4e4e7;border-radius:6px;padding:10px;font-size:12px;color:#3f3f46;line-height:1.6;background:white;">
+              Experienced product manager specializing in fintech with 5 years of expertise in payment systems, risk control, and user growth...
+            </div>
+          </div>
+
+          <!-- Experience section -->
+          <div style="margin-bottom:16px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+              <div style="font-size:13px;font-weight:600;color:#18181b;">Work Experience</div>
+              <div style="font-size:10px;color:#71717a;">&#8635; Regen</div>
+            </div>
+            <div style="border:1px solid #e4e4e7;border-radius:6px;padding:10px;background:white;margin-bottom:8px;">
+              <div style="font-size:12px;font-weight:600;color:#18181b;">Senior Product Manager</div>
+              <div style="font-size:11px;color:#71717a;">ABC Fintech | 2022.03 - Present</div>
+              <div style="font-size:12px;color:#3f3f46;margin-top:6px;line-height:1.5;">
+                <strong>[S]</strong> Faced with declining payment success rate (from 95% to 88%)...<br>
+                <strong>[T]</strong> Led the payment system optimization project...<br>
+                <strong>[A]</strong> Designed A/B testing framework, rebuilt the retry mechanism...<br>
+                <strong>[R]</strong> Payment success rate recovered to 97.2%, saving $2M annually...
+              </div>
+            </div>
+          </div>
+
+          <!-- Review badges -->
+          <div style="border-top:1px solid #e4e4e7;padding-top:12px;margin-top:8px;">
+            <div style="font-size:11px;color:#71717a;margin-bottom:6px;">Review Agent Feedback:</div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+              <span style="padding:2px 8px;background:#dcfce7;color:#166534;border-radius:10px;font-size:10px;">No fabrication detected</span>
+              <span style="padding:2px 8px;background:#fef9c3;color:#854d0e;border-radius:10px;font-size:10px;">Suggestion: Add metrics to Project 2</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: PDF Preview -->
+        <div style="background:#e4e4e7;padding:20px;display:flex;justify-content:center;">
+          <div style="background:white;width:90%;box-shadow:0 2px 8px rgba(0,0,0,0.1);padding:32px;font-size:11px;line-height:1.6;">
+            <div style="text-align:center;margin-bottom:16px;">
+              <div style="font-size:18px;font-weight:700;color:#18181b;letter-spacing:2px;">ZHANG SAN</div>
+              <div style="font-size:10px;color:#71717a;margin-top:4px;">138-0000-0000 | zhangsan@email.com | Shanghai</div>
+            </div>
+            <div style="border-bottom:1px solid #18181b;margin-bottom:12px;padding-bottom:2px;font-size:12px;font-weight:700;color:#18181b;">PERSONAL SUMMARY</div>
+            <div style="color:#3f3f46;margin-bottom:12px;">Experienced product manager specializing in fintech...</div>
+            <div style="border-bottom:1px solid #18181b;margin-bottom:12px;padding-bottom:2px;font-size:12px;font-weight:700;color:#18181b;">WORK EXPERIENCE</div>
+            <div style="margin-bottom:8px;">
+              <div style="display:flex;justify-content:space-between;">
+                <span style="font-weight:600;">Senior Product Manager</span>
+                <span style="color:#71717a;">2022.03 - Present</span>
+              </div>
+              <div style="color:#71717a;">ABC Fintech</div>
+              <div style="color:#3f3f46;margin-top:4px;">&#8226; [Situation] Faced with declining payment success rate...</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

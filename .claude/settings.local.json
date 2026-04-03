@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(/Users/leon/.claude/plugins/cache/claude-plugins-official/superpowers/5.0.6/scripts/start-server.sh --project-dir /Users/leon/vibeCoding/resumeEditor)",
+      "Bash(/Users/leon/.claude/plugins/cache/claude-plugins-official/superpowers/5.0.6/skills/brainstorming/scripts/start-server.sh --project-dir /Users/leon/vibeCoding/resumeEditor)",
+      "WebSearch"
+    ]
+  }
+}
