@@ -43,6 +43,7 @@ next-env.d.ts
 
 # local tooling (machine-specific paths)
 .claude/settings.local.json
+.superpowers/
 
 # large local reference images (see docs/resumeExpertise.md)
 社招简历撰写经验/
