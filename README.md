@@ -1,36 +1,76 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Resume Editor
 
-## Getting Started
+AI-assisted resume editor for the Chinese job market: paste your resume and a job description (JD), run a pipeline to parse, align, and rewrite content toward the JD (no fabrication — traceability to your source material). Export PDF with multiple templates.
 
-First, run the development server:
+Stack: Next.js (App Router), shadcn/ui, Tailwind CSS v4, Vercel AI SDK, Playwright for server-side HTML → PDF. State is persisted in the browser (`localStorage`); there is no built-in auth or database.
+
+## Prerequisites
+
+- Node.js 20+ recommended
+- npm
+- Playwright installs browser binaries on first PDF generation (handled by the `playwright` dependency)
+
+## Environment variables (API keys)
+
+**Do not commit real keys.** Use a local `.env.local` file (ignored by git) or your host’s secret store (e.g. Vercel Environment Variables).
+
+1. Copy the template:
+
+   ```bash
+   cp .env.example .env.local
+   ```
+
+2. Set at least **`MOONSHOT_API_KEY`** from the [Moonshot / Kimi](https://platform.moonshot.cn/) console so parse and rewrite work.
+
+### Default providers in this repository
+
+The code in [`lib/ai/provider.ts`](lib/ai/provider.ts) is wired as follows:
+
+- **Parse and rewrite** always call the **Moonshot (Kimi) OpenAI-compatible** endpoint (`https://api.moonshot.cn/v1`). A generic OpenAI key will **not** work without code changes.
+- **Full-document review** uses **MiMo** when `MIMO_API_KEY` is set; otherwise it uses **Kimi** for review as well.
+
+Optional variables are documented in [`.env.example`](.env.example). The `AI_PARSE_MODEL`, `AI_REWRITE_MODEL`, and `AI_REVIEW_MODEL` variables only select **model IDs on the Moonshot API** (or the MiMo path where applicable). They are **not** a universal switch to arbitrary cloud vendors.
+
+### Using another vendor (OpenAI, Anthropic, other gateways)
+
+This project does **not** ship a multi-provider switch. To use another provider you must **change the code** (e.g. adjust `provider.ts` to use the correct SDK, base URL, and auth headers) and verify that your models support the structured outputs used by the app (`generateObject` / JSON modes). The README only documents the **current default wiring**.
+
+## Development
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm run build
+npm run lint
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Reference material
 
-## Learn More
+Resume-writing guidance for 社招 is summarized in [`docs/resumeExpertise.md`](docs/resumeExpertise.md). Optional screenshot references live under `社招简历撰写经验/` **locally**; that folder is gitignored to keep clones small—add your own copies if you use them.
 
-To learn more about Next.js, take a look at the following resources:
+## Security checklist before `git push`
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- Never commit `.env`, `.env.local`, or any file containing API keys or tokens.
+- Run a quick scan on staged changes, e.g. `git diff --cached`, and avoid force-adding ignored env files (`git add -f`).
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Publishing to GitHub
 
-## Deploy on Vercel
+1. Create an empty repository on GitHub (no README/license if you already have them here).
+2. From this project root:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+   ```bash
+   git remote add origin https://github.com/<you>/<repo>.git
+   git branch -M main
+   git push -u origin main
+   ```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+   Use your SSH remote URL instead if you prefer SSH.
+
+## License
+
+See [LICENSE](LICENSE).
