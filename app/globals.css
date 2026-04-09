@@ -94,6 +94,10 @@
   --sidebar-accent-foreground: #18181b;
   --sidebar-border: #e4e4e7;
   --sidebar-ring: #18181b;
+  /* 文本类按钮统一最小宽度（约 6～7 个汉字 + 内边距）；仅最小值，文案更长时仍自动撑开 */
+  --button-text-min: 10rem;
+  /* 顶栏 / 工具条：分段 Tabs 与同排主按钮、图标按钮的统一高度（36px） */
+  --control-height: 2.25rem;
 }
 
 @layer base {
@@ -106,4 +110,34 @@
   html {
     @apply font-sans;
   }
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slide-up-content {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.4s ease-out both;
+}
+
+.animate-slide-up-content {
+  animation: slide-up-content 0.5s ease-out both;
 }

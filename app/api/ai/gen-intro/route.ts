@@ -4,6 +4,7 @@ import { getRewriteModel } from "@/lib/ai/provider";
 import { introSchema } from "@/lib/ai/schemas/intro";
 import { genIntroPrompt } from "@/lib/ai/prompts/gen-intro";
 import { JDAnalysis, MatchResult, WorkExperience } from "@/lib/types";
+import { stripMarkdownBoldMarkers } from "@/lib/resume/strip-markdown";
 
 export async function POST(req: NextRequest) {
   const { jdAnalysis, matchResult, experiences, language } = (await req.json()) as {
@@ -20,5 +21,7 @@ export async function POST(req: NextRequest) {
     prompt: "Write the three-line professional intro now.",
   });
 
-  return NextResponse.json(result.object);
+  return NextResponse.json({
+    threeLineIntro: stripMarkdownBoldMarkers(result.object.threeLineIntro),
+  });
 }

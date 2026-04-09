@@ -1,19 +1,43 @@
 import { NextRequest } from "next/server";
 import { generateObject } from "ai";
-import { getParseModel, getRewriteModel, getReviewModel } from "@/lib/ai/provider";
+import { getParseModel, getRewriteModel } from "@/lib/ai/provider";
+import { buildJdRewriteBrief } from "@/lib/ai/jd-rewrite-brief";
+import { formatMatchHintsForItem } from "@/lib/ai/match-hints";
+import { refineRewrittenItem } from "@/lib/ai/refine-rewritten-item";
 import { parsedResumeSchema } from "@/lib/ai/schemas/resume";
 import { jdAnalysisSchema } from "@/lib/ai/schemas/jd";
-import { rewriteResultSchema } from "@/lib/ai/schemas/rewrite";
-import { strengthsSchema } from "@/lib/ai/schemas/strengths";
-import { introSchema } from "@/lib/ai/schemas/intro";
-import { reviewFeedbackSchema } from "@/lib/ai/schemas/review";
+import {
+  matchAnalysisSchema,
+  workExperienceSchema,
+  projectExperienceSchema,
+  rewriteResultSchema,
+} from "@/lib/ai/schemas/rewrite";
 import { parseResumePrompt } from "@/lib/ai/prompts/parse-resume";
 import { analyzeJDPrompt } from "@/lib/ai/prompts/analyze-jd";
-import { matchRewritePrompt } from "@/lib/ai/prompts/match-rewrite";
-import { genStrengthsPrompt } from "@/lib/ai/prompts/gen-strengths";
-import { genIntroPrompt } from "@/lib/ai/prompts/gen-intro";
-import { reviewPrompt } from "@/lib/ai/prompts/review";
-import type { Resume, ParsedResume, JDAnalysis } from "@/lib/types";
+import {
+  matchAnalysisPrompt,
+  matchRewritePrompt,
+  rewriteSingleItemPrompt,
+} from "@/lib/ai/prompts/match-rewrite";
+import type {
+  Resume,
+  ParsedResume,
+  JDAnalysis,
+  WorkExperience,
+  ProjectExperience,
+} from "@/lib/types";
+import { stripMarkdownFromResumeOutput } from "@/lib/resume/strip-markdown";
+
+/** Single batch rewrite when few items — fewer HTTP round-trips; still runs per-item refine (review / patch). */
+const BATCH_ITEM_THRESHOLD = 3;
+
+type ItemJob = {
+  parsed: Record<string, unknown>;
+  type: "work" | "project";
+  index: number;
+  /** Pre-filled by batch rewrite when batch path succeeds */
+  batchDraft?: WorkExperience | ProjectExperience;
+};
 
 export async function POST(req: NextRequest) {
   const { resumeText, jdText, language, framework } = await req.json();
@@ -27,7 +51,6 @@ export async function POST(req: NextRequest) {
       }
 
       try {
-        // Group A: Parse resume + Analyze JD in parallel
         send("parse-resume", "running");
         send("analyze-jd", "running");
 
@@ -48,46 +71,179 @@ export async function POST(req: NextRequest) {
 
         const parsedResume = parseResult.object as ParsedResume;
         const jdAnalysis = jdResult.object as JDAnalysis;
+        const jdBrief = buildJdRewriteBrief(jdAnalysis);
 
         send("parse-resume", "done", parsedResume);
         send("analyze-jd", "done", jdAnalysis);
 
-        // Group B: Match & Rewrite
         send("match-rewrite", "running");
 
-        const rewriteResult = await generateObject({
-          model: getRewriteModel(),
-          schema: rewriteResultSchema,
-          system: matchRewritePrompt(parsedResume, jdAnalysis, framework, language),
-          prompt: "Rewrite the candidate's experiences to match the target job description. Follow all rules strictly.",
+        const totalItems =
+          parsedResume.experiences.length + parsedResume.projects.length;
+
+        const b1Result = (
+          await generateObject({
+            model: getParseModel(),
+            schema: matchAnalysisSchema,
+            system: matchAnalysisPrompt(parsedResume, jdAnalysis, language),
+            prompt: "Analyze the match between candidate and role now.",
+          })
+        ).object;
+
+        console.log(`[pipeline] B1 match-analysis done`);
+        send("match-analyze", "done", {
+          ...b1Result,
+          total: totalItems,
         });
 
-        const matchResult = rewriteResult.object;
+        const matched = b1Result.matchedExperiences;
+
+        const jobs: ItemJob[] = [
+          ...parsedResume.experiences.map((exp, i) => ({
+            parsed: exp as Record<string, unknown>,
+            type: "work" as const,
+            index: i,
+          })),
+          ...parsedResume.projects.map((proj, i) => ({
+            parsed: proj as Record<string, unknown>,
+            type: "project" as const,
+            index: i,
+          })),
+        ];
+
+        if (
+          jobs.length > 0 &&
+          jobs.length <= BATCH_ITEM_THRESHOLD
+        ) {
+          const batch = (
+            await generateObject({
+              model: getRewriteModel(),
+              schema: rewriteResultSchema,
+              system: matchRewritePrompt(
+                parsedResume,
+                jdAnalysis,
+                framework,
+                language
+              ),
+              prompt:
+                "Rewrite the candidate's experiences to match the target job description. Follow all rules strictly.",
+            })
+          ).object;
+
+          const batchOk =
+            batch.experiences.length === parsedResume.experiences.length &&
+            batch.projects.length === parsedResume.projects.length;
+
+          if (batchOk) {
+            let wi = 0;
+            let pi = 0;
+            for (const j of jobs) {
+              j.batchDraft =
+                j.type === "work"
+                  ? batch.experiences[wi++]
+                  : batch.projects[pi++];
+            }
+            console.log(
+              `[pipeline] batch rewrite OK (${jobs.length} items), refining per item...`
+            );
+          } else {
+            console.warn(
+              `[pipeline] batch length mismatch, falling back to per-item rewrite`
+            );
+          }
+        }
+
+        let completedItems = 0;
+
+        async function runJob(j: ItemJob): Promise<WorkExperience | ProjectExperience> {
+          const t0 = Date.now();
+          const matchHints = formatMatchHintsForItem(j.parsed, j.type, matched);
+
+          let rewritten: WorkExperience | ProjectExperience;
+
+          if (j.batchDraft) {
+            rewritten = j.batchDraft;
+          } else {
+            const schema =
+              j.type === "work" ? workExperienceSchema : projectExperienceSchema;
+            const rewriteResult = await generateObject({
+              model: getRewriteModel(),
+              schema,
+              system: rewriteSingleItemPrompt(
+                j.parsed,
+                jdBrief,
+                framework,
+                language,
+                j.type,
+                { matchHints }
+              ),
+              prompt:
+                "Rewrite this experience to match the target role. Follow all rules strictly.",
+            });
+            rewritten = rewriteResult.object as
+              | WorkExperience
+              | ProjectExperience;
+          }
+
+          const { finalResult, inlineReview } = await refineRewrittenItem({
+            parsedItem: j.parsed,
+            rewritten,
+            type: j.type,
+            jdBrief,
+            framework,
+            language,
+            matchHints,
+          });
+
+          if (!inlineReview.passed) {
+            console.log(
+              `[pipeline]   ${j.type}[${j.index}] gate still not passed, shipping with warning`
+            );
+          }
+
+          completedItems++;
+          const elapsed = ((Date.now() - t0) / 1000).toFixed(1);
+          console.log(
+            `[pipeline]   ${j.type}[${j.index}] done in ${elapsed}s (${completedItems}/${totalItems}) review=${inlineReview.passed}`
+          );
+
+          send("rewrite-progress", "done", {
+            type: j.type,
+            completed: completedItems,
+            total: totalItems,
+            data: finalResult,
+            inlineReview: {
+              passed: inlineReview.passed,
+              message: inlineReview.message,
+              missingKeywords: inlineReview.missingKeywords,
+            },
+          });
+
+          return finalResult;
+        }
+
+        const outcomes = await Promise.all(jobs.map(runJob));
+
+        const experiences = outcomes.slice(
+          0,
+          parsedResume.experiences.length
+        ) as WorkExperience[];
+        const projects = outcomes.slice(
+          parsedResume.experiences.length
+        ) as ProjectExperience[];
+
+        console.log(`[pipeline] B2 all done`);
+
+        const matchResult = {
+          overallScore: b1Result.overallScore,
+          matchedSkills: b1Result.matchedSkills,
+          gapSkills: b1Result.gapSkills,
+          matchedExperiences: b1Result.matchedExperiences,
+          experiences,
+          projects,
+        };
         send("match-rewrite", "done", matchResult);
 
-        // Group C: Generate strengths + intro in parallel
-        send("gen-strengths", "running");
-        send("gen-intro", "running");
-
-        const [strengthsResult, introResult] = await Promise.all([
-          generateObject({
-            model: getRewriteModel(),
-            schema: strengthsSchema,
-            system: genStrengthsPrompt(jdAnalysis, matchResult, language),
-            prompt: "Write the professional summary now.",
-          }),
-          generateObject({
-            model: getRewriteModel(),
-            schema: introSchema,
-            system: genIntroPrompt(jdAnalysis, matchResult, matchResult.experiences, language),
-            prompt: "Write the three-line professional intro now.",
-          }),
-        ]);
-
-        send("gen-strengths", "done", strengthsResult.object);
-        send("gen-intro", "done", introResult.object);
-
-        // Assemble the resume for review
         const resume: Resume = {
           meta: {
             id: "",
@@ -102,40 +258,28 @@ export async function POST(req: NextRequest) {
             parsedResume,
             jdAnalysis,
             matchResult: {
-              overallScore: matchResult.overallScore,
-              matchedSkills: matchResult.matchedSkills,
-              gapSkills: matchResult.gapSkills,
-              matchedExperiences: matchResult.matchedExperiences,
+              overallScore: b1Result.overallScore,
+              matchedSkills: b1Result.matchedSkills,
+              gapSkills: b1Result.gapSkills,
+              matchedExperiences: b1Result.matchedExperiences,
             },
             reviewFeedback: null,
+            reviewCompletedAt: null,
+            reviewedOutputHash: null,
           },
-          output: {
+          output: stripMarkdownFromResumeOutput({
             basicInfo: parsedResume.basicInfo,
-            summary: strengthsResult.object.summary,
-            threeLineIntro: introResult.object.threeLineIntro,
-            experiences: matchResult.experiences,
-            projects: matchResult.projects,
+            summary: "",
+            threeLineIntro: "",
+            experiences,
+            projects,
             education: parsedResume.education,
             skills: parsedResume.skills,
             languages: parsedResume.languages,
             awards: parsedResume.awards,
-          },
+          }),
         };
 
-        // Group D: Review
-        send("review", "running");
-
-        const reviewResult = await generateObject({
-          model: getReviewModel(),
-          schema: reviewFeedbackSchema,
-          system: reviewPrompt(resume),
-          prompt: "Review this resume content now. Be thorough and constructive.",
-        });
-
-        resume.analysis.reviewFeedback = reviewResult.object;
-        send("review", "done", reviewResult.object);
-
-        // Send final assembled resume
         send("complete", "done", resume);
       } catch (error) {
         const message = error instanceof Error ? error.message : "Unknown error";

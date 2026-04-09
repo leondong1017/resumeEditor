@@ -18,6 +18,10 @@ export interface Resume {
     jdAnalysis: JDAnalysis | null;
     matchResult: MatchResult | null;
     reviewFeedback: ReviewFeedback | null;
+    /** ISO timestamp after a successful review API run (unlocks PDF). */
+    reviewCompletedAt: string | null;
+    /** Snapshot hash of `output` when review last completed; for stale UI hint only. */
+    reviewedOutputHash: string | null;
   };
 
   output: {
@@ -88,6 +92,11 @@ export interface ParsedResume {
   awards: string[];
 }
 
+export interface KeywordGroup {
+  category: string;
+  keywords: string[];
+}
+
 export interface JDAnalysis {
   companyName: string;
   roleName: string;
@@ -96,6 +105,7 @@ export interface JDAnalysis {
   responsibilities: string[];
   keywords: string[];
   seniorityLevel: string;
+  keywordGroups: KeywordGroup[];
 }
 
 export interface MatchResult {
@@ -114,19 +124,13 @@ export interface ReviewFeedback {
     section: string;
     severity: "error" | "warning" | "suggestion";
     message: string;
-    originalText?: string;
-    suggestedText?: string;
+    originalText?: string | null;
+    suggestedText?: string | null;
   }>;
   overallAssessment: string;
 }
 
-export type PipelineStep =
-  | "parse-resume"
-  | "analyze-jd"
-  | "match-rewrite"
-  | "gen-strengths"
-  | "gen-intro"
-  | "review";
+export type PipelineStep = "parse-resume" | "analyze-jd" | "match-rewrite";
 
 export interface PipelineStepStatus {
   step: PipelineStep;

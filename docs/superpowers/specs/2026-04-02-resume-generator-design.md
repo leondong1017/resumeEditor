@@ -28,7 +28,7 @@ Upload Page → Processing Page → Editor Page
 
 ### Page 1: Upload
 - Split layout: left panel for resume input, right panel for JD input
-- Each panel supports: image upload (drag & drop), text paste, or both
+- **MVP**：文本粘贴；图片上传 / 拖拽为后续能力（见 `CLAUDE.md`）
 - Bottom controls: STAR/PDCA framework toggle, CN/EN language toggle
 - Single "Generate" CTA button
 
@@ -272,18 +272,13 @@ resumeEditor/
 │           └── preview/[template]/route.ts
 ├── components/
 │   ├── ui/                         # shadcn/ui
-│   ├── upload/
-│   │   ├── ResumeInput.tsx
-│   │   └── JDInput.tsx
 │   ├── editor/
 │   │   ├── SectionEditor.tsx
 │   │   ├── TemplateSelector.tsx
 │   │   ├── ReviewBadges.tsx
 │   │   └── ThreeLineIntro.tsx
 │   └── pdf/templates/
-│       ├── classic.tsx
-│       ├── modern.tsx
-│       └── tech.tsx
+│       └── classic.ts            # MVP；modern / tech 见路线图
 ├── lib/
 │   ├── ai/
 │   │   ├── provider.ts
@@ -306,34 +301,24 @@ resumeEditor/
 │   │   └── renderer.ts
 │   └── store/
 │       └── resume-store.ts
-├── styles/globals.css
-├── docs/design.md                  # Design system tokens
-└── public/fonts/                   # Noto Sans SC subset
+├── app/globals.css
+├── docs/design.md                  # 设计系统权威：令牌、约束、构建前走查
+└── public/fonts/                   # Noto Sans SC subset（若启用）
 ```
 
 ---
 
 ## 6. Design System
 
-### Tokens (to be documented in `docs/design.md`)
-
-| Token | Value |
-|-------|-------|
-| Font family | Inter (UI), Noto Sans SC (Chinese content) |
-| Font sizes | 12px body, 14px emphasis, 16px heading, 24px page title |
-| Colors - text | #18181b (primary), #3f3f46 (secondary), #71717a (muted), #a1a1aa (disabled) |
-| Colors - bg | #fafafa (page), #ffffff (card), #f4f4f5 (subtle), #e4e4e7 (border) |
-| Colors - accent | #dc2626 (red, warnings/destructive only) |
-| Border radius | 6px (input), 8px (card), 12px (panel) |
-| Spacing | 4px base unit, increments of 4/8/12/16/20/24/32 |
-| Max content width | 1280px |
-| Editor split | 50/50 |
+**令牌表、字号说明、圆角层级、实现约束、`npm run build` 前的设计走查与放行条件** 均以仓库根目录 **`docs/design.md`** 为准；本节仅保留产品层原则，避免与 `design.md` 双源维护导致不一致。
 
 ### Principles
 - Minimalist: no decorative elements, let content breathe
 - Consistent: all spacing, sizing, color from tokens — no magic numbers
 - Readable: sufficient contrast ratios (WCAG AA minimum)
 - Professional: the app should feel as polished as the resumes it produces
+
+（极简与流程层面的落地要求见 `docs/design.md` §3。）
 
 ---
 

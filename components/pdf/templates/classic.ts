@@ -1,4 +1,6 @@
 import { Resume } from "@/lib/types";
+import { normalizePdfMultiline } from "@/lib/pdf/normalize-multiline";
+import { escapeHtml } from "./html-escape";
 
 export function classicTemplate(resume: Resume): string {
   const { output, meta } = resume;
@@ -9,16 +11,17 @@ export function classicTemplate(resume: Resume): string {
 <head>
   <meta charset="UTF-8">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&family=Inter:wght@400;500;700&display=swap');
-
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
-      font-family: ${isZh ? "'Noto Sans SC'" : "'Inter'"}, sans-serif;
-      font-size: 10.5px;
+      font-family: ${isZh
+        ? "'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Noto Sans CJK SC', sans-serif"
+        : "Inter, -apple-system, 'Segoe UI', Roboto, sans-serif"};
+      font-size: 11pt;
       line-height: 1.5;
       color: #18181b;
-      padding: 40px 48px;
+      /* 页边距由 Playwright pdf margin 统一控制；避免 body padding 在分页时只在「整块」顶部生效导致次页顶格 */
+      padding: 0;
     }
 
     .header {
@@ -26,17 +29,19 @@ export function classicTemplate(resume: Resume): string {
       margin-bottom: 16px;
       padding-bottom: 12px;
       border-bottom: 1.5px solid #18181b;
+      break-after: avoid;
+      page-break-after: avoid;
     }
 
     .header h1 {
-      font-size: 20px;
+      font-size: 20pt;
       font-weight: 700;
       letter-spacing: 2px;
     }
 
     .header .contact {
       margin-top: 6px;
-      font-size: 9.5px;
+      font-size: 10pt;
       color: #3f3f46;
     }
 
@@ -50,7 +55,7 @@ export function classicTemplate(resume: Resume): string {
     }
 
     .section-title {
-      font-size: 11px;
+      font-size: 12pt;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 1.5px;
@@ -58,6 +63,8 @@ export function classicTemplate(resume: Resume): string {
       border-bottom: 1px solid #e4e4e7;
       padding-bottom: 3px;
       margin-bottom: 8px;
+      break-after: avoid;
+      page-break-after: avoid;
     }
 
     .entry {
@@ -72,17 +79,17 @@ export function classicTemplate(resume: Resume): string {
 
     .entry-title {
       font-weight: 600;
-      font-size: 10.5px;
+      font-size: 11pt;
     }
 
     .entry-date {
-      font-size: 9.5px;
+      font-size: 10pt;
       color: #71717a;
       white-space: nowrap;
     }
 
     .entry-subtitle {
-      font-size: 9.5px;
+      font-size: 10pt;
       color: #3f3f46;
     }
 
@@ -102,7 +109,7 @@ export function classicTemplate(resume: Resume): string {
     }
 
     .summary {
-      font-size: 10.5px;
+      font-size: 11pt;
       line-height: 1.6;
     }
   </style>
@@ -139,7 +146,7 @@ export function classicTemplate(resume: Resume): string {
         <span class="entry-date">${escapeHtml(exp.startDate)} - ${escapeHtml(exp.endDate)}</span>
       </div>
       <div class="entry-subtitle">${escapeHtml(exp.title)}</div>
-      <div class="entry-body">${escapeHtml(exp.description)}</div>
+      <div class="entry-body">${escapeHtml(normalizePdfMultiline(exp.description))}</div>
     </div>`
       )
       .join("")}
@@ -159,7 +166,7 @@ export function classicTemplate(resume: Resume): string {
         <span class="entry-date">${escapeHtml(proj.period)}</span>
       </div>
       <div class="entry-subtitle">${escapeHtml(proj.role)}</div>
-      <div class="entry-body">${escapeHtml(proj.description)}</div>
+      <div class="entry-body">${escapeHtml(normalizePdfMultiline(proj.description))}</div>
     </div>`
       )
       .join("")}
@@ -206,12 +213,4 @@ export function classicTemplate(resume: Resume): string {
   }
 </body>
 </html>`;
-}
-
-function escapeHtml(str: string): string {
-  return str
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
 }

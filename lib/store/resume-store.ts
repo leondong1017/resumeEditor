@@ -24,6 +24,8 @@ export function createEmptyResume(
       jdAnalysis: null,
       matchResult: null,
       reviewFeedback: null,
+      reviewCompletedAt: null,
+      reviewedOutputHash: null,
     },
     output: {
       basicInfo: { name: "" },
@@ -46,12 +48,23 @@ export function saveResume(resume: Resume): void {
   }
 }
 
+function normalizeResume(r: Resume): Resume {
+  return {
+    ...r,
+    analysis: {
+      ...r.analysis,
+      reviewCompletedAt: r.analysis.reviewCompletedAt ?? null,
+      reviewedOutputHash: r.analysis.reviewedOutputHash ?? null,
+    },
+  };
+}
+
 export function loadResume(): Resume | null {
   if (typeof window === "undefined") return null;
   const data = localStorage.getItem(STORAGE_KEY);
   if (!data) return null;
   try {
-    return JSON.parse(data) as Resume;
+    return normalizeResume(JSON.parse(data) as Resume);
   } catch {
     return null;
   }

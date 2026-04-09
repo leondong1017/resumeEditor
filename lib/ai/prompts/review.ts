@@ -1,7 +1,20 @@
 import { Resume } from "@/lib/types";
 
 export function reviewPrompt(resume: Resume) {
-  const lang = resume.meta.language === "zh" ? "Chinese" : "English";
+  const isZh = resume.meta.language === "zh";
+  const lang = isZh ? "Chinese" : "English";
+
+  const languageRule = isZh
+    ? `## Language (mandatory for this resume)
+The resume UI is Chinese. You MUST write in **Simplified Chinese only** for:
+- overallAssessment
+- every item's "message", "suggestedText", and "section"
+When quoting resume or JD wording, keep the original characters; your analysis and explanations must be Chinese. Do not mix English sentences with Chinese.
+Use human-readable section labels in Chinese, e.g. 「工作经历 · 公司名」or「项目经历 · 项目名」, not raw paths like experiences[0].description.
+The JSON keys and severity values stay English: "error", "warning", "suggestion".`
+    : `## Language (mandatory for this resume)
+Write overallAssessment, message, suggestedText, and section in clear **English** only.`;
+
   return `You are a strict HR reviewer and resume quality auditor. Review the following AI-generated resume content for quality issues.
 
 ## Your Persona
@@ -32,5 +45,12 @@ ${JSON.stringify(
 - Be specific in your feedback — cite exact text
 - Provide suggestedText for fixable issues
 - Keep overallAssessment to 2-3 sentences
-- Be constructive, not just critical`;
+- Be constructive, not just critical
+
+${languageRule}
+
+## Output
+Output a JSON object matching the schema. Use "items": [] if there are no issues.
+Be specific — cite exact text from the resume. Provide suggestedText for fixable issues.
+Keep overallAssessment to 2-3 sentences.`;
 }
